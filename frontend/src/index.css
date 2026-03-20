@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --navy-900: #080e1a;
+  --navy-800: #0d1526;
+  --navy-700: #111d33;
+  --navy-600: #162240;
+  --navy-500: #1e3058;
+  --blue-500: #2563eb;
+  --blue-400: #3b82f6;
+  --blue-300: #60a5fa;
+  --electric: #38bdf8;
+  --violet: #818cf8;
+  --violet-bright: #a78bfa;
+  --cyan: #00e5ff;
+  --green: #00ffc8;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --glass-bg: rgba(13, 21, 38, 0.7);
+  --glass-border: rgba(56, 189, 248, 0.12);
+  --glow-blue: rgba(56, 189, 248, 0.15);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--slate-300);
+  background: var(--navy-900);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--electric);
+  outline-offset: 2px;
+}
+
+input, select {
+  font-family: var(--font-body);
+}

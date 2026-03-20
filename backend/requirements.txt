@@ -1,0 +1,9 @@
+google-genai
+qdrant-client
+fastapi
+uvicorn[standard]
+python-dotenv
+pillow
+httpx
+pydantic
+python-multipart

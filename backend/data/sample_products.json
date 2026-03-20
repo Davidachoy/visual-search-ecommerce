@@ -1,0 +1,82 @@
+[
+  {
+    "id": "prod_001",
+    "name": "Classic White Sneakers",
+    "description": "Minimalist white leather sneakers with cushioned sole, perfect for casual everyday wear.",
+    "category": "footwear",
+    "price": 89.99,
+    "image_url": "https://picsum.photos/seed/sneakers/400/400"
+  },
+  {
+    "id": "prod_002",
+    "name": "Vintage Denim Jacket",
+    "description": "Washed blue denim jacket with button-up front and chest pockets. A timeless wardrobe staple.",
+    "category": "outerwear",
+    "price": 129.99,
+    "image_url": "https://picsum.photos/seed/denim/400/400"
+  },
+  {
+    "id": "prod_003",
+    "name": "Leather Crossbody Bag",
+    "description": "Compact genuine leather crossbody bag with adjustable strap and gold hardware accents.",
+    "category": "bags",
+    "price": 175.00,
+    "image_url": "https://picsum.photos/seed/leatherbag/400/400"
+  },
+  {
+    "id": "prod_004",
+    "name": "Floral Summer Dress",
+    "description": "Lightweight floral print midi dress with flutter sleeves, ideal for warm weather outings.",
+    "category": "dresses",
+    "price": 64.99,
+    "image_url": "https://picsum.photos/seed/floraldress/400/400"
+  },
+  {
+    "id": "prod_005",
+    "name": "Wool Blend Overcoat",
+    "description": "Tailored wool blend overcoat in camel tone with a double-breasted front and belt.",
+    "category": "outerwear",
+    "price": 299.00,
+    "image_url": "https://picsum.photos/seed/overcoat/400/400"
+  },
+  {
+    "id": "prod_006",
+    "name": "Slim Fit Chino Pants",
+    "description": "Stretch cotton slim fit chinos available in khaki. Comfortable and versatile for office or weekend.",
+    "category": "bottoms",
+    "price": 59.99,
+    "image_url": "https://picsum.photos/seed/chinos/400/400"
+  },
+  {
+    "id": "prod_007",
+    "name": "Aviator Sunglasses",
+    "description": "Classic metal frame aviator sunglasses with UV400 polarized lenses in mirror gold finish.",
+    "category": "accessories",
+    "price": 49.99,
+    "image_url": "https://picsum.photos/seed/aviators/400/400"
+  },
+  {
+    "id": "prod_008",
+    "name": "Ribbed Turtleneck Sweater",
+    "description": "Cozy ribbed knit turtleneck sweater in ivory. Soft, warm, and effortlessly chic.",
+    "category": "tops",
+    "price": 79.99,
+    "image_url": "https://picsum.photos/seed/turtleneck/400/400"
+  },
+  {
+    "id": "prod_009",
+    "name": "Canvas Tote Bag",
+    "description": "Large natural canvas tote bag with inner pocket and reinforced handles, great for shopping or beach.",
+    "category": "bags",
+    "price": 34.99,
+    "image_url": "https://picsum.photos/seed/tote/400/400"
+  },
+  {
+    "id": "prod_010",
+    "name": "Running Sports Watch",
+    "description": "Lightweight digital sports watch with heart rate monitor, GPS tracking, and 5ATM water resistance.",
+    "category": "accessories",
+    "price": 199.99,
+    "image_url": "https://picsum.photos/seed/sportswatch/400/400"
+  }
+]
