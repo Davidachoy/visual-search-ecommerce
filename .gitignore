@@ -17,6 +17,9 @@ build/
 # Qdrant data
 qdrant_data/
 
+# Downloaded image cache
+backend/data/image_cache/
+
 # Node
 node_modules/
 .next/

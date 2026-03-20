@@ -9,10 +9,10 @@ const FALLBACK =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iIzFhMjAzMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSI0OCIgZmlsbD0iIzJhMzU1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSI+8J+RqDwvdGV4dD48L3N2Zz4='
 
 function scoreLabel(score: number) {
-  if (score >= 0.9) return 'Exacto'
-  if (score >= 0.75) return 'Muy similar'
+  if (score >= 0.9) return 'Exact'
+  if (score >= 0.75) return 'Very similar'
   if (score >= 0.6) return 'Similar'
-  return 'Relacionado'
+  return 'Related'
 }
 
 function scoreColor(score: number) {
@@ -48,7 +48,7 @@ export default function ProductCard({ product }: Props) {
         <p className="card-description">{product.description}</p>
         <div className="card-footer">
           <span className="card-price">
-            ${product.price.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+            ${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
           <span
             className="card-score-pct"

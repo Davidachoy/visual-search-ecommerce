@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import SearchBar from './components/SearchBar'
 import ImageDropzone from './components/ImageDropzone'
 import ProductGrid from './components/ProductGrid'
+import AddProductView from './components/AddProductView'
 import {
   searchByText,
   searchByImage,
@@ -11,10 +12,12 @@ import {
 import type { ProductResult, SearchMode } from './types'
 import './App.css'
 
+type View = 'search' | 'add'
+
 const MODE_LABELS: Record<NonNullable<SearchMode>, string> = {
-  text: 'Búsqueda por texto',
-  image: 'Búsqueda por imagen',
-  multimodal: 'Búsqueda multimodal',
+  text: 'Text search',
+  image: 'Image search',
+  multimodal: 'Multimodal search',
 }
 
 const MODE_COLORS: Record<NonNullable<SearchMode>, string> = {
@@ -24,6 +27,7 @@ const MODE_COLORS: Record<NonNullable<SearchMode>, string> = {
 }
 
 export default function App() {
+  const [view, setView] = useState<View>('search')
   const [query, setQuery] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -85,7 +89,7 @@ export default function App() {
       setQueryTimeMs(response.query_time_ms)
     } catch (err: unknown) {
       const msg =
-        err instanceof Error ? err.message : 'Error al conectar con el servidor'
+        err instanceof Error ? err.message : 'Failed to connect to the server'
       setError(msg)
     } finally {
       setLoading(false)
@@ -106,19 +110,44 @@ export default function App() {
             <span className="logo-mark">VS</span>
             <div>
               <h1 className="logo-title">Visual Search</h1>
-              <p className="logo-sub">Encontrá lo que buscás con texto o imagen</p>
+              <p className="logo-sub">Find what you're looking for with text or image</p>
             </div>
           </div>
+          <nav className="header-nav">
+            <button
+              className={`nav-btn${view === 'search' ? ' nav-btn--active' : ''}`}
+              onClick={() => setView('search')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              Search
+            </button>
+            <button
+              className={`nav-btn${view === 'add' ? ' nav-btn--active' : ''}`}
+              onClick={() => setView('add')}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Add product
+            </button>
+          </nav>
         </div>
       </header>
 
       <main className="main">
+        {view === 'add' && <AddProductView onBack={() => setView('search')} />}
+
+        {view === 'search' && (
         <section className="search-section">
           <div className="search-panel">
             <div className="search-inputs">
               <div className="search-text-area">
                 <SearchBar
-                  onSearch={setQuery}
+                  value={query}
+                  onChange={setQuery}
+                  onSubmit={handleSearch}
                   loading={loading}
                 />
               </div>
@@ -145,7 +174,7 @@ export default function App() {
                     <path d="m21 21-4.35-4.35" />
                   </svg>
                 )}
-                {loading ? 'Buscando...' : 'Buscar'}
+                {loading ? 'Searching...' : 'Search'}
               </button>
 
               <button
@@ -155,7 +184,7 @@ export default function App() {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
                 </svg>
-                Filtros
+                Filters
                 {filtersOpen && <span className="filter-dot" />}
               </button>
             </div>
@@ -163,13 +192,13 @@ export default function App() {
             {filtersOpen && (
               <div className="filters-panel">
                 <div className="filter-group">
-                  <label className="filter-label">Categoría</label>
+                  <label className="filter-label">Category</label>
                   <select
                     className="filter-select"
                     value={selectedCategory ?? ''}
                     onChange={(e) => setSelectedCategory(e.target.value || null)}
                   >
-                    <option value="">Todas las categorías</option>
+                    <option value="">All categories</option>
                     {categories.map((c) => (
                       <option key={c} value={c}>
                         {c.charAt(0).toUpperCase() + c.slice(1)}
@@ -180,7 +209,7 @@ export default function App() {
 
                 <div className="filter-group">
                   <label className="filter-label">
-                    Precio máximo:{' '}
+                    Max price:{' '}
                     <strong className="filter-value">
                       ${maxPrice === 500 ? '500+' : maxPrice}
                     </strong>
@@ -203,7 +232,9 @@ export default function App() {
             )}
           </div>
         </section>
+        )}
 
+        {view === 'search' && (
         <section className="results-section">
           {error && (
             <div className="error-banner">
@@ -229,6 +260,7 @@ export default function App() {
             queryTimeMs={queryTimeMs}
           />
         </section>
+        )}
       </main>
 
       <footer className="footer">

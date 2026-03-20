@@ -25,18 +25,18 @@ export default function ImageDropzone({ onImageSelect, preview, onClear }: Props
   if (preview) {
     return (
       <div className="dropzone dropzone--preview">
-        <img src={preview} alt="Vista previa" className="dropzone-preview-img" />
+        <img src={preview} alt="Preview" className="dropzone-preview-img" />
         <button
           className="dropzone-clear"
           onClick={(e) => {
             e.stopPropagation()
             onClear()
           }}
-          aria-label="Quitar imagen"
+          aria-label="Remove image"
         >
           ✕
         </button>
-        <div className="dropzone-preview-label">Imagen cargada</div>
+        <div className="dropzone-preview-label">Image loaded</div>
       </div>
     )
   }
@@ -55,9 +55,9 @@ export default function ImageDropzone({ onImageSelect, preview, onClear }: Props
         </svg>
       </div>
       <p className="dropzone-text">
-        {isDragActive ? 'Soltá la imagen acá' : 'Arrastrá una imagen'}
+        {isDragActive ? 'Drop the image here' : 'Drag an image'}
       </p>
-      <p className="dropzone-subtext">o hacé click para seleccionar</p>
+      <p className="dropzone-subtext">or click to select</p>
     </div>
   )
 }

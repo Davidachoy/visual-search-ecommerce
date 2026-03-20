@@ -1,17 +1,11 @@
-import { useState } from 'react'
-
 interface Props {
-  onSearch: (query: string) => void
+  value: string
+  onChange: (query: string) => void
+  onSubmit: () => void
   loading: boolean
 }
 
-export default function SearchBar({ onSearch, loading }: Props) {
-  const [value, setValue] = useState('')
-
-  const handleSubmit = () => {
-    if (!loading) onSearch(value.trim())
-  }
-
+export default function SearchBar({ value, onChange, onSubmit, loading }: Props) {
   return (
     <div className="search-bar">
       <div className="search-input-wrap">
@@ -22,17 +16,17 @@ export default function SearchBar({ onSearch, loading }: Props) {
         <input
           type="text"
           className="search-input"
-          placeholder="Describí lo que buscás..."
+          placeholder="Describe what you're looking for..."
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && onSubmit()}
           disabled={loading}
         />
         {value && (
           <button
             className="clear-btn"
-            onClick={() => setValue('')}
-            aria-label="Limpiar"
+            onClick={() => onChange('')}
+            aria-label="Clear"
           >
             ✕
           </button>

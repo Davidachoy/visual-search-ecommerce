@@ -37,17 +37,33 @@ class GeminiEmbedder:
 
         return response.embeddings[0].values
 
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """
+        Embed multiple texts in a single API call (RETRIEVAL_DOCUMENT).
+        Up to ~100 texts per call. Much faster than calling embed_text() in a loop.
+        """
+        response = self.client.models.embed_content(
+            model=EMBEDDING_MODEL,
+            contents=texts,
+            config=types.EmbedContentConfig(
+                task_type="RETRIEVAL_DOCUMENT",
+                output_dimensionality=EMBEDDING_DIMS,
+            ),
+        )
+        time.sleep(_RATE_LIMIT_SLEEP)
+        return [e.values for e in response.embeddings]
+
     def embed_text(self, text: str) -> list[float]:
         """Embed a text string for document indexing."""
         return self._embed(text, task_type="RETRIEVAL_DOCUMENT")
 
-    def embed_image(self, image_bytes: bytes) -> list[float]:
+    def embed_image(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> list[float]:
         """Embed raw image bytes (JPEG/PNG)."""
-        part = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+        part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
         return self._embed([part], task_type="RETRIEVAL_DOCUMENT")
 
     def embed_product(
-        self, name: str, description: str, image_bytes: bytes | None
+        self, name: str, description: str, image_bytes: bytes | None, mime_type: str = "image/jpeg"
     ) -> list[float]:
         """
         Embed a product for indexing.
@@ -63,10 +79,10 @@ class GeminiEmbedder:
         contents = types.Content(
             parts=[
                 types.Part(text=text),
-                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
             ]
         )
-        return self._embed(contents, task_type="RETRIEVAL_DOCUMENT")
+        return self._embed([contents], task_type="RETRIEVAL_DOCUMENT")
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a search query (different task_type from document indexing)."""

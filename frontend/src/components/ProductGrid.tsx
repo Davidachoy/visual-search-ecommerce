@@ -43,8 +43,8 @@ export default function ProductGrid({ results, loading, queryTimeMs }: Props) {
             <path d="M8 11h6M11 8v6" />
           </svg>
         </div>
-        <p className="empty-title">No se encontraron productos</p>
-        <p className="empty-sub">Intentá con otros términos o una imagen diferente</p>
+        <p className="empty-title">No products found</p>
+        <p className="empty-sub">Try different keywords or a different image</p>
       </div>
     )
   }
@@ -55,7 +55,7 @@ export default function ProductGrid({ results, loading, queryTimeMs }: Props) {
     <>
       {queryTimeMs !== null && (
         <p className="query-meta">
-          {results.length} resultado{results.length !== 1 ? 's' : ''} en{' '}
+          {results.length} result{results.length !== 1 ? 's' : ''} in{' '}
           <strong>{queryTimeMs.toFixed(0)} ms</strong>
         </p>
       )}

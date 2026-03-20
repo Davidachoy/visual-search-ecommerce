@@ -114,8 +114,22 @@ class ProductIndexer:
 
     def _download_image(self, url: str, timeout: float = 10.0) -> bytes | None:
         """Downloads an image by URL. Returns None on failure."""
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124.0.0.0 Safari/537.36"
+            )
+        }
         try:
-            response = httpx.get(url, timeout=timeout, follow_redirects=True)
+            response = httpx.get(
+                url, timeout=timeout, follow_redirects=True, headers=headers
+            )
+            if response.status_code == 429:
+                time.sleep(2.0)
+                response = httpx.get(
+                    url, timeout=timeout, follow_redirects=True, headers=headers
+                )
             response.raise_for_status()
             return response.content
         except Exception as exc:

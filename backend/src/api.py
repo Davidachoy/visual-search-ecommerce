@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+import uuid
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -8,12 +9,19 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from embeddings import GeminiEmbedder
-from vector_store import COLLECTION_NAME, ProductVectorStore
+from src.embeddings import GeminiEmbedder
+from src.vector_store import COLLECTION_NAME, ProductVectorStore
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# Default minimum similarity score — override with MIN_SCORE_DEFAULT in .env
+_MIN_SCORE_DEFAULT: float | None = (
+    float(os.environ["MIN_SCORE_DEFAULT"])
+    if os.environ.get("MIN_SCORE_DEFAULT")
+    else None
+)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
@@ -98,6 +106,7 @@ class TextSearchRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=1000)
     category: str | None = None
     max_price: float | None = Field(default=None, gt=0)
+    min_score: float | None = Field(default=None, ge=0.0, le=1.0)
     limit: int = Field(default=10, ge=1, le=100)
 
 
@@ -115,6 +124,14 @@ class SearchResponse(BaseModel):
     results: list[ProductResult]
     query_time_ms: float
     total_found: int
+
+
+class AddProductResponse(BaseModel):
+    id: str
+    name: str
+    category: str
+    price: float
+    image_url: str
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +237,7 @@ async def search_text(body: TextSearchRequest):
             k=body.limit,
             category=body.category,
             max_price=body.max_price,
+            min_score=body.min_score if body.min_score is not None else _MIN_SCORE_DEFAULT,
         )
     except Exception as exc:
         logger.exception("Qdrant search failed")
@@ -234,6 +252,7 @@ async def search_image(
     limit: int = Form(default=10, ge=1, le=100),
     category: str | None = Form(default=None),
     max_price: float | None = Form(default=None),
+    min_score: float | None = Form(default=None),
 ):
     """Image search: upload a photo and find visually similar products."""
     if not file.content_type or not file.content_type.startswith("image/"):
@@ -250,7 +269,7 @@ async def search_image(
         raise HTTPException(status_code=422, detail="Uploaded file is empty.")
 
     try:
-        query_vector = embedder.embed_image(image_bytes)
+        query_vector = embedder.embed_image(image_bytes, mime_type=file.content_type)
     except Exception as exc:
         logger.exception("Image embedding failed")
         raise HTTPException(status_code=502, detail=f"Embedding error: {exc}")
@@ -261,6 +280,7 @@ async def search_image(
             k=limit,
             category=category,
             max_price=max_price,
+            min_score=min_score if min_score is not None else _MIN_SCORE_DEFAULT,
         )
     except Exception as exc:
         logger.exception("Qdrant search failed")
@@ -276,6 +296,7 @@ async def search_multimodal(
     limit: int = Form(default=10, ge=1, le=100),
     category: str | None = Form(default=None),
     max_price: float | None = Form(default=None),
+    min_score: float | None = Form(default=None),
 ):
     """
     Multimodal search: text and/or image.
@@ -308,17 +329,19 @@ async def search_multimodal(
             raise HTTPException(status_code=422, detail="Uploaded file is empty.")
 
     try:
+        file_mime = file.content_type if has_file else "image/jpeg"
         if has_text and has_file:
             # Multimodal: text + image in a single call
             query_vector = embedder.embed_product(
                 name=query.strip(),
                 description="",
                 image_bytes=image_bytes,
+                mime_type=file_mime,
             )
         elif has_text:
             query_vector = embedder.embed_query(query.strip())
         else:
-            query_vector = embedder.embed_image(image_bytes)
+            query_vector = embedder.embed_image(image_bytes, mime_type=file_mime)
     except Exception as exc:
         logger.exception("Multimodal embedding failed")
         raise HTTPException(status_code=502, detail=f"Embedding error: {exc}")
@@ -329,9 +352,68 @@ async def search_multimodal(
             k=limit,
             category=category,
             max_price=max_price,
+            min_score=min_score if min_score is not None else _MIN_SCORE_DEFAULT,
         )
     except Exception as exc:
         logger.exception("Qdrant search failed")
         raise HTTPException(status_code=502, detail=f"Search error: {exc}")
 
     return _to_search_response(raw, start)
+
+
+@app.post("/products", response_model=AddProductResponse, status_code=201, tags=["catalog"])
+async def add_product(
+    name: str = Form(..., min_length=1, max_length=200),
+    description: str = Form(..., min_length=1, max_length=2000),
+    category: str = Form(..., min_length=1, max_length=100),
+    price: float = Form(..., gt=0),
+    image_url: str = Form(default=""),
+    image: UploadFile | None = File(default=None),
+):
+    """Index a new product with optional image upload for multimodal embedding."""
+    embedder, store = _get_deps()
+
+    product_id = f"prod_{uuid.uuid4().hex[:8]}"
+    image_bytes: bytes | None = None
+
+    if image and image.filename:
+        if not image.content_type or not image.content_type.startswith("image/"):
+            raise HTTPException(status_code=422, detail=f"File must be an image, got: {image.content_type}")
+        image_bytes = await image.read()
+        if not image_bytes:
+            raise HTTPException(status_code=422, detail="Uploaded file is empty.")
+
+    try:
+        embedding = embedder.embed_product(
+            name=name,
+            description=description,
+            image_bytes=image_bytes,
+            mime_type=image.content_type if image_bytes else "image/jpeg",
+        )
+    except Exception as exc:
+        logger.exception("Embedding failed for new product")
+        raise HTTPException(status_code=502, detail=f"Embedding error: {exc}")
+
+    payload = {
+        "product_id": product_id,
+        "name": name,
+        "description": description,
+        "category": category.lower().strip(),
+        "price": price,
+        "image_url": image_url,
+    }
+
+    try:
+        store.upsert_product(product_id=product_id, embedding=embedding, payload=payload)
+    except Exception as exc:
+        logger.exception("Qdrant upsert failed")
+        raise HTTPException(status_code=502, detail=f"Storage error: {exc}")
+
+    logger.info("Product indexed: %s (%s)", product_id, name)
+    return AddProductResponse(
+        id=product_id,
+        name=name,
+        category=payload["category"],
+        price=price,
+        image_url=image_url,
+    )

@@ -90,6 +90,7 @@ class ProductVectorStore:
         k: int = 10,
         category: str | None = None,
         max_price: float | None = None,
+        min_score: float | None = None,
     ) -> list[dict]:
         """
         Returns the k products nearest to query_vector.
@@ -97,6 +98,8 @@ class ProductVectorStore:
         Optional filters:
         - category: exact match on the 'category' field.
         - max_price: numeric range on the 'price' field (≤ max_price).
+        - min_score: minimum cosine similarity threshold (0.0–1.0).
+                     Results below this score are excluded.
         """
         must_conditions: list[FieldCondition] = []
 
@@ -118,6 +121,7 @@ class ProductVectorStore:
             query_filter=query_filter,
             limit=k,
             with_payload=True,
+            score_threshold=min_score,
         )
 
         return [
