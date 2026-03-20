@@ -77,7 +77,7 @@ cp .env.example .env
 
 # 5. Index products and start the API
 python scripts/index_products.py        # skips already-indexed products
-uvicorn src.api:app --reload --port 8000 --app-dir src
+uvicorn src.api:app --reload --port 8000
 ```
 
 **Frontend (optional):**
